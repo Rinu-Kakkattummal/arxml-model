@@ -1,12 +1,16 @@
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 # =====================================================
 # Configuration
 # =====================================================
 
-# ARXML_FILE = "ConnectionEditor.arxml"
-ARXML_FILE = "ECUExtract.arxml"
-OUTPUT_M_FILE = "generate_model.m"
+ARXML_FILE = "arxml/ECUExtract.arxml"
+
+GENERATED_DIR = Path("generated")
+GENERATED_DIR.mkdir(exist_ok=True)
+
+OUTPUT_M_FILE = GENERATED_DIR / "generate_model.m"
 
 # =====================================================
 # Helper Functions
@@ -19,7 +23,7 @@ def tag_name(element):
     Example:
     {http://autosar.org/schema/r4.0}SHORT-NAME
 
-    becomes:
+    becomes
 
     SHORT-NAME
     """
@@ -28,13 +32,24 @@ def tag_name(element):
 
 def get_short_name(element):
     """
-    Return child SHORT-NAME value.
+    Return SHORT-NAME child text.
     """
+
     for child in element:
         if tag_name(child) == "SHORT-NAME":
             return child.text
+
     return None
 
+
+# =====================================================
+# Check ARXML Exists
+# =====================================================
+
+if not Path(ARXML_FILE).exists():
+    raise FileNotFoundError(
+        f"ARXML file not found: {ARXML_FILE}"
+    )
 
 # =====================================================
 # Parse ARXML
@@ -43,7 +58,9 @@ def get_short_name(element):
 tree = ET.parse(ARXML_FILE)
 root = tree.getroot()
 
-print("Root Tag:", root.tag)
+print("=" * 50)
+print("Root Tag :", root.tag)
+print("=" * 50)
 
 components = []
 rports = []
@@ -52,7 +69,7 @@ irvs = []
 runnables = []
 
 # =====================================================
-# Discover Components
+# Component Discovery
 # =====================================================
 
 COMPONENT_TYPES = {
@@ -74,7 +91,7 @@ for elem in root.iter():
             components.append(name)
 
 # =====================================================
-# Discover R Ports
+# R Ports
 # =====================================================
 
 for elem in root.iter():
@@ -87,7 +104,7 @@ for elem in root.iter():
             rports.append(name)
 
 # =====================================================
-# Discover P Ports
+# P Ports
 # =====================================================
 
 for elem in root.iter():
@@ -100,7 +117,7 @@ for elem in root.iter():
             pports.append(name)
 
 # =====================================================
-# Discover IRVs
+# IRVs
 # =====================================================
 
 for elem in root.iter():
@@ -113,7 +130,7 @@ for elem in root.iter():
             irvs.append(name)
 
 # =====================================================
-# Discover Runnables
+# Runnables
 # =====================================================
 
 for elem in root.iter():
@@ -129,23 +146,23 @@ for elem in root.iter():
 # Debug Output
 # =====================================================
 
-print("\nComponents")
+print("\nComponents:")
 print(components)
 
-print("\nR Ports")
+print("\nR Ports:")
 print(rports)
 
-print("\nP Ports")
+print("\nP Ports:")
 print(pports)
 
-print("\nIRVs")
+print("\nIRVs:")
 print(irvs)
 
-print("\nRunnables")
+print("\nRunnables:")
 print(runnables)
 
 # =====================================================
-# Determine Model Name
+# Model Name
 # =====================================================
 
 if components:
@@ -153,11 +170,13 @@ if components:
 else:
     model_name = "StubModel"
 
+print(f"\nModel Name: {model_name}")
+
 # =====================================================
-# Generate MATLAB Script
+# MATLAB Script Generation
 # =====================================================
 
-with open(OUTPUT_M_FILE, "w") as f:
+with open(OUTPUT_M_FILE, "w", encoding="utf-8") as f:
 
     f.write("clc;\n")
     f.write("bdclose('all');\n\n")
@@ -168,7 +187,7 @@ with open(OUTPUT_M_FILE, "w") as f:
     f.write("open_system(modelName);\n\n")
 
     # =================================================
-    # R Ports
+    # R PORTS
     # =================================================
 
     f.write("%% R PORTS\n")
@@ -186,7 +205,7 @@ with open(OUTPUT_M_FILE, "w") as f:
         y += 80
 
     # =================================================
-    # P Ports
+    # P PORTS
     # =================================================
 
     f.write("%% P PORTS\n")
@@ -222,7 +241,7 @@ with open(OUTPUT_M_FILE, "w") as f:
         y += 80
 
     # =================================================
-    # Runnables
+    # RUNNABLES
     # =================================================
 
     f.write("%% RUNNABLES\n")
@@ -240,7 +259,7 @@ with open(OUTPUT_M_FILE, "w") as f:
         y += 120
 
     # =================================================
-    # Dummy Logic
+    # DUMMY LOGIC
     # =================================================
 
     f.write("%% DUMMY LOGIC\n")
@@ -253,7 +272,7 @@ with open(OUTPUT_M_FILE, "w") as f:
     )
 
     # =================================================
-    # Wiring
+    # CONNECTIONS
     # =================================================
 
     f.write("%% CONNECTIONS\n")
@@ -275,10 +294,10 @@ with open(OUTPUT_M_FILE, "w") as f:
         )
 
     # =================================================
-    # Build Settings
+    # MODEL CONFIGURATION
     # =================================================
 
-    f.write("%% BUILD CONFIGURATION\n")
+    f.write("%% MODEL CONFIGURATION\n")
 
     f.write(
         "set_param(modelName, ...\n"
@@ -292,8 +311,21 @@ with open(OUTPUT_M_FILE, "w") as f:
         "    'FixedStepAuto');\n\n"
     )
 
-    f.write("save_system(modelName);\n")
-    f.write("disp('Model Generated Successfully');\n")
+    # =================================================
+    # SAVE MODEL
+    # =================================================
 
-print(f"\nGenerated file: {OUTPUT_M_FILE}")
+    f.write(
+        "save_system(modelName, ..."
+        " fullfile('generated',[modelName '.slx']));\n"
+    )
 
+    f.write("close_system(modelName);\n")
+
+    f.write(
+        "disp(['Generated: generated/' modelName '.slx']);\n"
+    )
+
+print("\n" + "=" * 50)
+print(f"Generated MATLAB File: {OUTPUT_M_FILE}")
+print("=" * 50)
