@@ -1,0 +1,65 @@
+name: ARXML_TO_SLX
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+
+  generate-model:
+
+    runs-on:
+      - self-hosted
+      - Windows
+      - matlab
+
+    steps:
+
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Verify Python
+      run: python --version
+
+    - name: Run ARXML Parser
+      run: |
+        python python/parser.py
+
+    - name: Verify M File Generated
+      shell: powershell
+      run: |
+        if (!(Test-Path "generated\generate_model.m"))
+        {
+            throw "generated\generate_model.m not found"
+        }
+
+    - name: List Generated Files
+      shell: powershell
+      run: |
+        Get-ChildItem generated -Recurse
+
+    - name: Run MATLAB Script
+      run: |
+        matlab -batch "run('generated/generate_model.m')"
+
+    - name: Verify SLX Generated
+      shell: powershell
+      run: |
+        if (!(Test-Path "generated\DoorControl.slx"))
+        {
+            throw "generated\DoorControl.slx not generated"
+        }
+
+    - name: Archive SLX
+      uses: actions/upload-artifact@v4
+      with:
+        name: generated-slx
+        path: generated/DoorControl.slx
