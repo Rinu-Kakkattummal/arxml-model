@@ -295,4 +295,5 @@ with open(OUTPUT_M_FILE, "w") as f:
     f.write("save_system(modelName);\n")
     f.write("disp('Model Generated Successfully');\n")
 
-print(f"\nGenerated: {OUTPUT_M_FILE}")
+print(f"\nGenerated file: {OUTPUT_M_FILE}")
+
