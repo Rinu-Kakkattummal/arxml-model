@@ -1,3 +1,41 @@
-
 <AUTOSAR>
     <AR-PACKAGES>
+        <AR-PACKAGE>
+            <SHORT-NAME>ECU</SHORT-NAME>
+            <ELEMENTS>
+                <APPLICATION-SW-COMPONENT-TYPE>
+                    <SHORT-NAME>DoorControl</SHORT-NAME>
+                    <PORTS>
+                        <R-PORT-PROTOTYPE>
+                            <SHORT-NAME>VehicleSpeed_R</SHORT-NAME>
+                        </R-PORT-PROTOTYPE>
+                        <R-PORT-PROTOTYPE>
+                            <SHORT-NAME>DoorRequest_R</SHORT-NAME>
+                        </R-PORT-PROTOTYPE>
+                        <P-PORT-PROTOTYPE>
+                            <SHORT-NAME>DoorStatus_P</SHORT-NAME>
+                        </P-PORT-PROTOTYPE>
+                        <P-PORT-PROTOTYPE>
+                            <SHORT-NAME>LockStatus_P</SHORT-NAME>
+                        </P-PORT-PROTOTYPE>
+                    </PORTS>
+                    <INTERNAL-BEHAVIORS>
+                        <SWC-INTERNAL-BEHAVIOR>
+                            <RUNNABLES>
+                                <RUNNABLE-ENTITY>
+                                    <SHORT-NAME>InitRunnable</SHORT-NAME>
+                                </RUNNABLE-ENTITY>
+                                <RUNNABLE-ENTITY>
+                                    <SHORT-NAME>MainRunnable</SHORT-NAME>
+                                </RUNNABLE-ENTITY>
+                            </RUNNABLES>
+                        </SWC-INTERNAL-BEHAVIOR>
+                    </INTERNAL-BEHAVIORS>
+                </APPLICATION-SW-COMPONENT-TYPE>
+                <VARIABLE-DATA-PROTOTYPE>
+                    <SHORT-NAME>PreviousDoorState_IRV</SHORT-NAME>
+                </VARIABLE-DATA-PROTOTYPE>
+            </ELEMENTS>
+        </AR-PACKAGE>
+    </AR-PACKAGES>
+</AUTOSAR>
